@@ -12,19 +12,19 @@ const errorHandler = require('errorhandler');
 class App {
 
     public app: express.Application;
-    private appRoutes:AppRoutes = new AppRoutes();
-    private userRoutes:UserRoutes = new UserRoutes();
-    private mongoUrl: string = 'mongodb://localhost/guptasamajdb'; 
+    private appRoutes: AppRoutes = new AppRoutes();
+    private userRoutes: UserRoutes = new UserRoutes();
+    private mongoUrl: string = 'mongodb://localhost/guptasamajdb';
     constructor() {
         this.app = express();
         this.configDB();
-        this.config();   
-        this.appRoutes.routes(this.app);  
+        this.config();
+        this.setCORS();
+        this.appRoutes.routes(this.app);
         this.userRoutes.routes(this.app);
         this.app.use(methodOverride());
         new RouteErrors().handlers(this.app);
-        this.app.use(errorHandler); 
-        this.app.use(cors());
+        this.app.use(errorHandler);
         this.app.use(session({ secret: 'passport-tutorial', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
     }
 
@@ -32,12 +32,29 @@ class App {
         MongoDBConnection.setup(this.mongoUrl);
     }
 
-    private config(): void{
+    private config(): void {
         // support application/json type post data
         this.app.use(bodyParser.json());
         //support application/x-www-form-urlencoded post data
         this.app.use(bodyParser.urlencoded({ extended: false }));
-        
+
+    }
+
+    private setCORS(): void {
+        var originsWhitelist = [
+            'http://localhost:4200',
+            'http://localhost:8080'
+        ];
+        var corsOptions = {
+            origin: function (origin, callback) {
+                var isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
+                callback(null, isWhitelisted);
+            },
+            credentials: true
+        }
+        //here is the magic
+        this.app.use(cors(corsOptions));
+
     }
 
 }

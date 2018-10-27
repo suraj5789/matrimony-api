@@ -3,7 +3,7 @@ export class FailureResponse {
         REQUIRED_MOBILE : 'Mobile number is required.',
         REQUIRED_PWD : 'Password is required.',
         INCORRECT_MOBILE_OR_PWD : 'Mob,ile number or Password is not valid.',
-        USER_EXITS_ALREADY : 'User with mobile number ${user.mobilenum}, already exist.'
+        USER_EXITS_ALREADY : 'User with mobile number ${user.mobileNum}, already exist.'
         
     }   
     public static responseObj()

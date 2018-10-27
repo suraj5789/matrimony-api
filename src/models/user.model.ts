@@ -13,7 +13,7 @@ export const UserSchema = new Schema({
         type: String,
         required: true
     },
-    mobilenum: {
+    mobileNum: {
         type: Number,
         required : true         
     },
@@ -58,7 +58,9 @@ UserSchema.methods.generateJWT = function() {
 UserSchema.methods.toAuthJSON = function() {
   return {
     _id: this._id,
-    email: this.email,
+    mobileNum: this.mobileNum,
+    firstName : this.firstName,
+    lastName : this.lastName,
     token: this.generateJWT(),
   };
 };

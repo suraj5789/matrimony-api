@@ -20,7 +20,12 @@ export class UserRoutes {
         // Contact detail
         app.route('/user/authenticate')
         // get specific contact
-        .post(Auth.optional, (req, res, next) => this.userController.authenticate(req, res, next))
+        .get(Auth.optional, (req, res, next) => {
+           res.json({statusCode : 'Success'})
+        })
+        .post(Auth.optional, (req, res, next) => {
+            this.userController.authenticate(req, res, next)
+        })
         
         app.route('/user/current')
         // get specific contact

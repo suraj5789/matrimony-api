@@ -6,16 +6,18 @@ import { Response } from 'express';
 import { Request } from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
+import { SuccessResponse } from '../responses/response.success';
 const User = mongoose.model('User', UserSchema);
 export class UserService {
     private failureResponse = FailureResponse.responseObj();
+    private successResponse = SuccessResponse.responseObj();
     constructor() {
         console.log('its called from user service')
     };
 
     register(req: Request, res: Response) {
         const { body: { user } } = req;
-        if (!user.mobilenum) {
+        if (!user.mobileNum) {
             this.failureResponse.message = FailureResponse.MESSAGES.REQUIRED_MOBILE;
             this.failureResponse.statusCode = 422;
             return res.status(this.failureResponse.statusCode).json(this.failureResponse);
@@ -27,10 +29,10 @@ export class UserService {
             return res.status(this.failureResponse.statusCode).json(this.failureResponse);
         }
         let self = this;
-        User.findOne({ mobilenum: user.mobilenum }, function (err, existedUser) {
+        User.findOne({ mobileNum: user.mobileNum }, function (err, existedUser) {
             if (err) throw err;
             if (existedUser) {
-                self.failureResponse.message = FailureResponse.MESSAGES.USER_EXITS_ALREADY.replace('${user.mobilenum}', existedUser.mobilenum);
+                self.failureResponse.message = FailureResponse.MESSAGES.USER_EXITS_ALREADY.replace('${user.mobileNum}', existedUser.mobileNum);
                 self.failureResponse.statusCode = 420;
                 return res.json(self.failureResponse);
 
@@ -41,7 +43,14 @@ export class UserService {
                 finalUser.setPassword(user.password);
 
                 return finalUser.save()
-                    .then(() => res.json({ user: finalUser.toAuthJSON() }));
+                    .then(() => {
+                        self.successResponse.result = {
+                            user: finalUser.toAuthJSON()
+                        }
+                        res.status(200);
+                        return res.json(self.successResponse);                        
+                    }
+                    );
             }
         });
 
@@ -50,8 +59,8 @@ export class UserService {
 
     authenticate(req: Request, res: Response, next) {
         const { body: { user } } = req;
-
-        if (!user.mobilenum) {
+        let self = this;
+        if (!user.mobileNum) {
             this.failureResponse.message = FailureResponse.MESSAGES.REQUIRED_MOBILE;
             this.failureResponse.statusCode = 422;
             return res.status(this.failureResponse.statusCode).json(this.failureResponse);
@@ -71,8 +80,11 @@ export class UserService {
             if (passportUser) {
                 const user = passportUser;
                 user.token = passportUser.generateJWT();
-
-                return res.json({ user: user.toAuthJSON() });
+                self.successResponse.result = {
+                    user: user.toAuthJSON()
+                }
+                res.status(200);
+                return res.json(self.successResponse);
             }
             else if (failureResponse) {
                 res.status(failureResponse.statusCode);

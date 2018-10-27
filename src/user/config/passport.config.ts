@@ -6,14 +6,14 @@ const LocalStrategy = require('passport-local');
 const Users = mongoose.model('User');
 
 passport.use(new LocalStrategy({
-  usernameField: 'user[mobilenum]',
+  usernameField: 'user[mobileNum]',
   passwordField: 'user[password]',
-}, (mobilenum, password, done) => {
-  Users.findOne({ mobilenum })
+}, (mobileNum, password, done) => {
+  Users.findOne({ mobileNum })
     .then((user) => {
       if(!user || !user.validatePassword(password)) {
         let failureResponse = FailureResponse.responseObj();
-        failureResponse.message = FailureResponse.MESSAGES.REQUIRED_MOBILE_OR_PWD;
+        failureResponse.message = FailureResponse.MESSAGES.INCORRECT_MOBILE_OR_PWD;
         failureResponse.statusCode = 442;
         return done(null, false, failureResponse);
       }
