@@ -34,7 +34,8 @@ export class UserService {
             if (existedUser) {
                 self.failureResponse.message = FailureResponse.MESSAGES.USER_EXITS_ALREADY.replace('${user.mobileNum}', existedUser.mobileNum);
                 self.failureResponse.statusCode = 420;
-                return res.json(self.failureResponse);
+                return res.status(self.failureResponse.statusCode)
+                 .json(self.failureResponse);
 
             }
             else {
