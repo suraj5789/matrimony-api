@@ -1,10 +1,17 @@
 import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
+import * as autoIncrement from 'mongoose-auto-increment';
 
 const Schema = mongoose.Schema;
 
+mongoose.set('useCreateIndex', true);
 export const UserSchema = new Schema({
+    userId : {
+        type : Number,
+        require : false,
+        unique: true
+    },
     firstName: {
         type: String,
         required: true
@@ -57,11 +64,13 @@ UserSchema.methods.generateJWT = function() {
 
 UserSchema.methods.toAuthJSON = function() {
   return {
-    _id: this._id,
+    userId: this.userId,
     mobileNum: this.mobileNum,
     firstName : this.firstName,
     lastName : this.lastName,
     token: this.generateJWT(),
   };
 };
+autoIncrement.initialize(mongoose.connection);
+UserSchema.plugin(autoIncrement.plugin, { model: 'User', field: 'userId', startAt: 1 });
 mongoose.model('User', UserSchema);

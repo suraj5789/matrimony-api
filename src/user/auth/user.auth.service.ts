@@ -1,14 +1,12 @@
-import { FailureResponse } from './../responses/response.failure';
-import { UserSchema } from './../models/user.model';
-import './config/auth.config';
-import './config/passport.config';
-import { Response } from 'express';
-import { Request } from 'express';
+import { FailureResponse, SuccessResponse } from './../../responses';
+import { UserSchema } from './../../models/user.model';
+import '../config/auth.config';
+import '../config/passport.config';
+import { Response, Request } from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
-import { SuccessResponse } from '../responses/response.success';
 const User = mongoose.model('User', UserSchema);
-export class UserService {
+export class UserAuthService {
     private failureResponse = FailureResponse.responseObj();
     private successResponse = SuccessResponse.responseObj();
     constructor() {

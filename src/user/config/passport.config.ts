@@ -1,4 +1,4 @@
-import { FailureResponse } from '../../responses/response.failure';
+import { FailureResponse } from '../../responses';
 const mongoose = require('mongoose');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');

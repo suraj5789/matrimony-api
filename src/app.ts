@@ -1,5 +1,5 @@
 import { RouteErrors } from './app.error.handlers';
-import { UserRoutes } from './user/user.routes';
+import { UserAuthRoutes, UserProfileRoutes } from './user/';
 import { MongoDBConnection } from './persistent/mongo.db.connection';
 import { AppRoutes } from './app.routes';
 import * as express from "express";
@@ -13,19 +13,15 @@ class App {
 
     public app: express.Application;
     private appRoutes: AppRoutes = new AppRoutes();
-    private userRoutes: UserRoutes = new UserRoutes();
+    private userAuthRoutes: UserAuthRoutes = new UserAuthRoutes();
+    private userProfileRoutes: UserProfileRoutes = new UserProfileRoutes();
     private mongoUrl: string = 'mongodb://localhost/guptasamajdb';
     constructor() {
         this.app = express();
         this.configDB();
         this.config();
         this.setCORS();
-        this.appRoutes.routes(this.app);
-        this.userRoutes.routes(this.app);
-        this.app.use(methodOverride());
-        new RouteErrors().handlers(this.app);
-        this.app.use(errorHandler);
-        this.app.use(session({ secret: 'passport-tutorial', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+        this.setRoutes();
     }
 
     private configDB(): void {
@@ -37,7 +33,6 @@ class App {
         this.app.use(bodyParser.json());
         //support application/x-www-form-urlencoded post data
         this.app.use(bodyParser.urlencoded({ extended: false }));
-
     }
 
     private setCORS(): void {
@@ -54,7 +49,16 @@ class App {
         }
         //here is the magic
         this.app.use(cors(corsOptions));
+    }
 
+    private setRoutes() {
+        this.appRoutes.routes(this.app);
+        this.userAuthRoutes.routes(this.app);
+        this.userProfileRoutes.routes(this.app);
+        this.app.use(methodOverride());
+        new RouteErrors().handlers(this.app);
+        this.app.use(errorHandler);
+        this.app.use(session({ secret: 'passport-tutorial', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
     }
 
 }
