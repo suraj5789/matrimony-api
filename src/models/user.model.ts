@@ -6,7 +6,7 @@ import * as autoIncrement from 'mongoose-auto-increment';
 const Schema = mongoose.Schema;
 
 mongoose.set('useCreateIndex', true);
-export const UserSchema = new Schema({
+const UserSchema = new Schema({
     userId : {
         type : Number,
         require : false,
@@ -73,4 +73,4 @@ UserSchema.methods.toAuthJSON = function() {
 };
 autoIncrement.initialize(mongoose.connection);
 UserSchema.plugin(autoIncrement.plugin, { model: 'User', field: 'userId', startAt: 1 });
-mongoose.model('User', UserSchema);
+export const User = mongoose.model('User', UserSchema);

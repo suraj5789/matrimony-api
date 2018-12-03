@@ -1,40 +1,33 @@
 import { FailureResponse, SuccessResponse } from './../../responses';
-import { UserSchema } from './../../models/user.model';
+import { User } from './../../models/user.model';
 import '../config/auth.config';
 import '../config/passport.config';
 import { Response, Request } from 'express';
 import * as mongoose from 'mongoose';
 import * as passport from 'passport';
-const User = mongoose.model('User', UserSchema);
 export class UserAuthService {
-    private failureResponse = FailureResponse.responseObj();
-    private successResponse = SuccessResponse.responseObj();
     constructor() {
         console.log('its called from user service')
     };
 
     register(req: Request, res: Response) {
         const { body: { user } } = req;
-        if (!user.mobileNum) {
-            this.failureResponse.message = FailureResponse.MESSAGES.REQUIRED_MOBILE;
-            this.failureResponse.statusCode = 422;
-            return res.status(this.failureResponse.statusCode).json(this.failureResponse);
+        if (!user.mobileNum) {   
+            return FailureResponse.getResponse(res, FailureResponse.MESSAGES.REQUIRED_MOBILE,
+                {}, 422);
         }
 
         if (!user.password) {
-            this.failureResponse.message = FailureResponse.MESSAGES.REQUIRED_PWD;
-            this.failureResponse.statusCode = 422;
-            return res.status(this.failureResponse.statusCode).json(this.failureResponse);
+            return FailureResponse.getResponse(res, FailureResponse.MESSAGES.REQUIRED_PWD,
+                {}, 422);
         }
         let self = this;
         User.findOne({ mobileNum: user.mobileNum }, function (err, existedUser) {
             if (err) throw err;
             if (existedUser) {
-                self.failureResponse.message = FailureResponse.MESSAGES.USER_EXITS_ALREADY.replace('${user.mobileNum}', existedUser.mobileNum);
-                self.failureResponse.statusCode = 420;
-                return res.status(self.failureResponse.statusCode)
-                 .json(self.failureResponse);
-
+                let message = FailureResponse.MESSAGES.USER_EXITS_ALREADY.replace('${user.mobileNum}', existedUser.mobileNum);
+                return FailureResponse.getResponse(res, message,
+                {}, 420);
             }
             else {
                 const finalUser = new User(user);
@@ -43,13 +36,10 @@ export class UserAuthService {
 
                 return finalUser.save()
                     .then(() => {
-                        self.successResponse.result = {
+                        return SuccessResponse.getResponse(res, {
                             user: finalUser.toAuthJSON()
-                        }
-                        res.status(200);
-                        return res.json(self.successResponse);                        
-                    }
-                    );
+                        });                        
+                    });
             }
         });
 
@@ -60,15 +50,13 @@ export class UserAuthService {
         const { body: { user } } = req;
         let self = this;
         if (!user.mobileNum) {
-            this.failureResponse.message = FailureResponse.MESSAGES.REQUIRED_MOBILE;
-            this.failureResponse.statusCode = 422;
-            return res.status(this.failureResponse.statusCode).json(this.failureResponse);
+            return FailureResponse.getResponse(res, FailureResponse.MESSAGES.REQUIRED_MOBILE,
+                {}, 422);
         }
 
         if (!user.password) {
-            this.failureResponse.message = FailureResponse.MESSAGES.REQUIRED_PWD;
-            this.failureResponse.statusCode = 422;
-            return res.status(this.failureResponse.statusCode).json(this.failureResponse);
+            return FailureResponse.getResponse(res, FailureResponse.MESSAGES.REQUIRED_PWD,
+                {}, 422);
         }
 
         return passport.authenticate('local', { session: false }, (err, passportUser, failureResponse) => {
@@ -79,11 +67,9 @@ export class UserAuthService {
             if (passportUser) {
                 const user = passportUser;
                 user.token = passportUser.generateJWT();
-                self.successResponse.result = {
+                return SuccessResponse.getResponse(res, {
                     user: user.toAuthJSON()
-                }
-                res.status(200);
-                return res.json(self.successResponse);
+                });
             }
             else if (failureResponse) {
                 res.status(failureResponse.statusCode);
